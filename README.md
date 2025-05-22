@@ -8,14 +8,14 @@ A modern, user-friendly React application for creating IEEE double-column format
 - **Title & Author Management**: Easy-to-use forms for paper metadata
 - **Abstract & Keywords**: Dedicated editor with word count and keyword management
 - **Section Management**: Drag-and-drop section reordering with rich text editing
-- **References**: Comprehensive reference manager with proper IEEE citation formatting
+- **References**: Comprehensive reference manager with proper IEEE citation formatting (manual input)
 
 ### 🎨 **Rich Text Editing**
 - **WYSIWYG Editor**: Powered by TipTap with full formatting capabilities
-- **Tables**: Easy table creation and editing with IEEE formatting
-- **Images**: Drag-and-drop image insertion with caption management
-- **Mathematical Equations**: Support for mathematical notation
-- **Links**: URL and cross-reference management
+- **Tables**: Reference-based table insertion with a dedicated builder and IEEE formatting
+- **Images**: Reference-based image insertion with drag-and-drop uploader and caption management
+- **Mathematical Equations**: (Planned) Support for mathematical notation
+- **Links**: URL and cross-reference management (basic link support)
 
 ### 📄 **IEEE Formatting**
 - **Double Column Layout**: Automatic IEEE-compliant two-column formatting
@@ -137,8 +137,7 @@ ieee-paper-editor/
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS with custom IEEE styles
 - **Rich Text Editor**: TipTap
-- **Drag & Drop**: React DnD
-- **Charts**: Recharts
+- **Drag & Drop**: React DnD (for section reordering)
 - **PDF Export**: jsPDF + html2canvas
 - **Icons**: Lucide React
 
@@ -181,10 +180,13 @@ For issues or questions:
 ## Future Enhancements
 
 - [ ] Real-time collaboration
-- [ ] Advanced equation editor
+- [ ] Advanced equation editor (e.g., using KaTeX or MathJax)
 - [ ] Template library
-- [ ] Citation import from databases
+- [ ] Citation import from databases (e.g., BibTeX)
 - [ ] Plagiarism checking integration
 - [ ] Version history
 - [ ] Comments and annotations
-- [ ] Advanced chart creation tools 
+- [ ] Advanced chart creation tools (e.g., using Recharts or similar)
+- [ ] Automated reference formatting from DOI or metadata
+- [ ] Enhanced table editing capabilities
+- [ ] More robust cross-referencing features 

@@ -7,16 +7,19 @@ interface TitleEditorProps {
 
 const TitleEditor: React.FC<TitleEditorProps> = ({ title, onUpdate }) => {
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Paper Title</h2>
+    <div className="p-8 bg-white shadow-sm rounded-lg max-w-3xl mx-auto my-8">
+      <label htmlFor="paperTitle" className="block text-xl font-semibold mb-3 text-slate-700">
+        Paper Title
+      </label>
       <textarea
+        id="paperTitle"
         value={title}
         onChange={(e) => onUpdate(e.target.value)}
-        className="w-full p-4 text-2xl font-bold text-center border border-gray-300 rounded-lg resize-none"
+        className="w-full px-4 py-3 text-xl font-medium border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none bg-white"
         rows={3}
         placeholder="Enter your paper title here..."
       />
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-3 text-sm text-slate-500">
         Keep your title concise and descriptive. IEEE papers typically have titles under 100 characters.
       </p>
     </div>

@@ -1,7 +1,8 @@
 import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
-import { GripVertical, Plus, Trash2, FileText } from 'lucide-react';
+import { GripVertical, PlusCircle, Trash2, FileText } from 'lucide-react';
 import { Section } from '../types/paper';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface SidebarProps {
   sections: Section[];
@@ -17,8 +18,9 @@ interface DraggableSectionProps {
   index: number;
   isActive: boolean;
   onSelect: () => void;
-  onDelete: () => void;
+  onDelete: (sectionId: string) => void;
   onMove: (dragIndex: number, hoverIndex: number) => void;
+  itemCount: number;
 }
 
 const DraggableSection: React.FC<DraggableSectionProps> = ({
@@ -27,8 +29,12 @@ const DraggableSection: React.FC<DraggableSectionProps> = ({
   isActive,
   onSelect,
   onDelete,
-  onMove
+  onMove,
+  itemCount
 }) => {
+  const { addNotification } = useNotification();
+  const ref = React.useRef<HTMLDivElement>(null);
+
   const [{ isDragging }, drag] = useDrag({
     type: 'section',
     item: { index },
@@ -39,40 +45,62 @@ const DraggableSection: React.FC<DraggableSectionProps> = ({
 
   const [, drop] = useDrop({
     accept: 'section',
-    hover: (draggedItem: { index: number }) => {
-      if (draggedItem.index !== index) {
-        onMove(draggedItem.index, index);
-        draggedItem.index = index;
+    hover: (draggedItem: { index: number }, monitor) => {
+      if (!ref.current) {
+        return;
       }
+      const dragIndex = draggedItem.index;
+      const hoverIndex = index;
+
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+
+      const hoverBoundingRect = ref.current?.getBoundingClientRect();
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientY = clientOffset!.y - hoverBoundingRect.top;
+
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return;
+      }
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
+
+      onMove(dragIndex, hoverIndex);
+      draggedItem.index = hoverIndex;
     },
   });
 
+  drag(drop(ref));
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (itemCount <= 1) {
+      addNotification("Cannot delete the last section.", "warning");
+    } else {
+      onDelete(section.id);
+    }
+  };
+
   return (
     <div
-      ref={(node) => drag(drop(node))}
-      className={`
-        flex items-center p-3 mx-2 rounded-lg cursor-pointer transition-all duration-150
-        ${isActive 
-          ? 'bg-blue-100 text-blue-900 border-l-4 border-blue-500' 
-          : 'hover:bg-gray-100 text-gray-700'
-        }
-        ${isDragging ? 'opacity-50' : ''}
-      `}
+      ref={ref}
       onClick={onSelect}
+      className={`flex justify-between items-center p-2.5 rounded-md cursor-pointer transition-colors duration-150 text-sm ${isActive ? 'bg-blue-500 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200'} ${isDragging ? 'opacity-50 bg-gray-300' : ''}`}
+      title={section.title || 'Untitled Section'}
     >
-      <div className="flex items-center flex-1 min-w-0">
-        <GripVertical size={16} className="text-gray-400 mr-2 flex-shrink-0" />
-        <FileText size={16} className="mr-2 flex-shrink-0" />
-        <span className="truncate text-sm font-medium">
-          {section.title}
-        </span>
+      <div className="flex items-center min-w-0">
+        <GripVertical size={16} className="text-gray-400 mr-2 flex-shrink-0 cursor-grab" />
+        <FileText size={16} className={`mr-2 flex-shrink-0 ${isActive ? 'text-blue-200' : 'text-gray-500'}`} />
+        <span className="truncate" title={section.title}>{section.title || 'Untitled Section'}</span>
       </div>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        className="p-1 text-gray-400 hover:text-red-500 transition-colors duration-150"
+      <button 
+        onClick={handleDelete}
+        className={`ml-2 p-1 rounded transition-colors duration-150 ${isActive ? 'text-blue-100 hover:text-white hover:bg-blue-400' : 'text-gray-400 hover:text-red-500 hover:bg-red-100'}`}
+        title="Delete section"
+        disabled={itemCount <= 1}
       >
         <Trash2 size={14} />
       </button>
@@ -89,41 +117,36 @@ const Sidebar: React.FC<SidebarProps> = ({
   onReorderSections
 }) => {
   return (
-    <div className="w-64 bg-white border-r border-gray-200 h-screen overflow-y-auto">
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Sections</h2>
-          <button
-            onClick={onAddSection}
-            className="flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-150"
-          >
-            <Plus size={16} className="mr-1" />
-            Add
-          </button>
-        </div>
+    <aside className="w-72 bg-slate-50 p-4 space-y-4 border-r border-gray-200 h-screen sticky top-0 overflow-y-auto flex flex-col">
+      <div className="flex-shrink-0">
+        <h2 className="text-xl font-semibold mb-4 text-slate-800 px-1">Sections</h2>
+        <button
+          onClick={onAddSection}
+          className="w-full flex items-center justify-center px-3 py-2.5 mb-4 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors shadow-sm hover:shadow-md"
+        >
+          <PlusCircle size={18} className="mr-2" />
+          Add Section
+        </button>
       </div>
-
-      <div className="py-2">
+      <ul className="space-y-1.5 flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
         {sections.map((section, index) => (
           <DraggableSection
             key={section.id}
-            section={section}
             index={index}
-            isActive={section.id === activeSection}
+            section={section}
+            isActive={activeSection === section.id}
             onSelect={() => onSectionSelect(section.id)}
-            onDelete={() => onDeleteSection(section.id)}
+            onDelete={onDeleteSection}
             onMove={onReorderSections}
+            itemCount={sections.length}
           />
         ))}
+      </ul>
+      <div className="mt-auto pt-4 text-xs text-slate-500 border-t border-gray-200 flex-shrink-0">
+          <p>Total sections: {sections.length}</p>
+          <p>Drag sections to reorder.</p>
       </div>
-
-      <div className="p-4 border-t border-gray-200 mt-auto">
-        <div className="text-xs text-gray-500 space-y-1">
-          <div>Total sections: {sections.length}</div>
-          <div>Click to edit, drag to reorder</div>
-        </div>
-      </div>
-    </div>
+    </aside>
   );
 };
 

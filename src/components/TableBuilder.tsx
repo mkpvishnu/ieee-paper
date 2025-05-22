@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Minus, Table as TableIcon, Trash2 } from 'lucide-react';
+import { PlusCircle, MinusCircle, Trash2, Rows, Columns, Table as TableIconLucide } from 'lucide-react';
 import { Table } from '../types/paper';
 
 interface TableBuilderProps {
@@ -15,23 +15,23 @@ const TableBuilder: React.FC<TableBuilderProps> = ({
   onRemoveTable,
   onUpdateTable
 }) => {
-  const [newTableRows, setNewTableRows] = useState(3);
-  const [newTableCols, setNewTableCols] = useState(3);
+  const [newTableRows, setNewTableRows] = useState(2);
+  const [newTableCols, setNewTableCols] = useState(2);
 
   const createTable = () => {
-    const headers = Array(newTableCols).fill('').map((_, i) => `Column ${i + 1}`);
-    const rows = Array(newTableRows).fill(null).map(() => 
+    const headers = Array(newTableCols).fill('').map((_, i) => `Header ${i + 1}`);
+    const rowsData = Array(newTableRows).fill(null).map(() => 
       Array(newTableCols).fill('')
     );
-
     const newTable: Table = {
-      id: Date.now().toString(),
+      id: `tbl-${Date.now().toString(36).substr(2, 5)}`,
       caption: 'Enter table caption here',
       headers,
-      rows
+      rows: rowsData
     };
-
     onAddTable(newTable);
+    setNewTableRows(2);
+    setNewTableCols(2);
   };
 
   const updateHeader = (tableId: string, colIndex: number, value: string) => {
@@ -74,7 +74,7 @@ const TableBuilder: React.FC<TableBuilderProps> = ({
   const addColumn = (tableId: string) => {
     const table = tables.find(t => t.id === tableId);
     if (table) {
-      const newHeaders = [...table.headers, `Column ${table.headers.length + 1}`];
+      const newHeaders = [...table.headers, `Header ${table.headers.length + 1}`];
       const newRows = table.rows.map(row => [...row, '']);
       onUpdateTable(tableId, { headers: newHeaders, rows: newRows });
     }
@@ -89,114 +89,94 @@ const TableBuilder: React.FC<TableBuilderProps> = ({
     }
   };
 
+  const inputBaseClass = "block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors";
+  const smallInputClass = "w-full p-1.5 text-xs border-slate-300 rounded-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white focus:bg-white transition-colors";
+
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">Tables</h2>
+    <div className="p-8 bg-white shadow-sm rounded-lg max-w-5xl mx-auto my-8">
+      <h2 className="text-xl font-semibold text-slate-700 mb-6 pb-4 border-b border-slate-200">Manage Tables</h2>
       
-      {/* Create New Table */}
-      <div className="bg-gray-50 rounded-lg p-4 mb-8">
-        <h3 className="text-lg font-semibold mb-4">Create New Table</h3>
-        <div className="flex items-center space-x-4 mb-4">
+      <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 shadow-sm mb-8">
+        <h3 className="text-lg font-semibold text-slate-700 mb-4">Create New Table</h3>
+        <div className="flex flex-wrap items-end gap-4 mb-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Rows
-            </label>
+            <label htmlFor="new-table-rows" className="block text-sm font-medium text-slate-600 mb-1">Rows</label>
             <input
-              type="number"
-              min="1"
-              max="20"
-              value={newTableRows}
-              onChange={(e) => setNewTableRows(parseInt(e.target.value) || 1)}
-              className="w-20 p-2 border border-gray-300 rounded"
+              id="new-table-rows"
+              type="number" min="1" max="20" value={newTableRows}
+              onChange={(e) => setNewTableRows(Math.max(1, parseInt(e.target.value) || 1))}
+              className={`${inputBaseClass} w-24 pr-1`}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Columns
-            </label>
+            <label htmlFor="new-table-cols" className="block text-sm font-medium text-slate-600 mb-1">Columns</label>
             <input
-              type="number"
-              min="1"
-              max="10"
-              value={newTableCols}
-              onChange={(e) => setNewTableCols(parseInt(e.target.value) || 1)}
-              className="w-20 p-2 border border-gray-300 rounded"
+              id="new-table-cols"
+              type="number" min="1" max="10" value={newTableCols}
+              onChange={(e) => setNewTableCols(Math.max(1, parseInt(e.target.value) || 1))}
+              className={`${inputBaseClass} w-24 pr-1`}
             />
           </div>
           <button
             onClick={createTable}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            type="button"
+            className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-colors shadow-sm hover:shadow-md whitespace-nowrap"
           >
-            <TableIcon size={16} className="mr-2" />
+            <TableIconLucide size={18} className="mr-2" />
             Create Table
           </button>
         </div>
       </div>
 
-      {/* Existing Tables */}
+      {tables.length === 0 && (
+         <div className="mt-10 text-center py-10 border-2 border-dashed border-slate-200 rounded-lg">
+            <TableIconLucide size={48} className="mx-auto text-slate-300 mb-4" />
+            <h3 className="text-lg font-medium text-slate-500">No tables created yet</h3>
+            <p className="text-sm text-slate-400">Use the form above to add your first table.</p>
+        </div>
+      )}
+
       <div className="space-y-8">
         {tables.map((table) => (
-          <div key={table.id} className="border border-gray-300 rounded-lg overflow-hidden">
-            <div className="bg-gray-50 px-4 py-3 border-b border-gray-300">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <h3 className="text-lg font-semibold">Table {table.id}</h3>
-                  <input
-                    type="text"
-                    value={table.caption}
-                    onChange={(e) => onUpdateTable(table.id, { caption: e.target.value })}
-                    className="px-2 py-1 border border-gray-300 rounded text-sm"
-                    placeholder="Table caption"
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => addRow(table.id)}
-                    className="p-1 text-green-600 hover:text-green-800"
-                    title="Add Row"
-                  >
-                    <Plus size={16} />
-                  </button>
-                  <button
-                    onClick={() => addColumn(table.id)}
-                    className="p-1 text-blue-600 hover:text-blue-800"
-                    title="Add Column"
-                  >
-                    <Plus size={16} />
-                  </button>
-                  <button
-                    onClick={() => onRemoveTable(table.id)}
-                    className="p-1 text-red-600 hover:text-red-800"
-                    title="Delete Table"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+          <div key={table.id} className="bg-slate-50 rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white px-4 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <TableIconLucide size={18} className="text-blue-500 flex-shrink-0" />
+                <span className="text-xs font-mono text-slate-600 select-all" title="Table ID">{table.id}</span>
+              </div>
+              <div className="flex-grow min-w-[200px]">
+                <label htmlFor={`caption-${table.id}`} className="sr-only">Caption for {table.id}</label>
+                <input
+                  id={`caption-${table.id}`}
+                  type="text" value={table.caption}
+                  onChange={(e) => onUpdateTable(table.id, { caption: e.target.value })}
+                  className={`${inputBaseClass} text-sm`} 
+                  placeholder="Table caption"
+                />
+              </div>
+              <div className="flex items-center space-x-1.5 flex-shrink-0">
+                <button onClick={() => addRow(table.id)} type="button" className="p-1.5 text-green-600 rounded-md hover:bg-green-100 focus:outline-none focus:ring-1 focus:ring-green-500" title="Add Row"><Rows size={16} /></button>
+                <button onClick={() => addColumn(table.id)} type="button" className="p-1.5 text-blue-600 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-1 focus:ring-blue-500" title="Add Column"><Columns size={16} /></button>
+                <button onClick={() => onRemoveTable(table.id)} type="button" className="p-1.5 text-red-500 rounded-md hover:bg-red-100 focus:outline-none focus:ring-1 focus:ring-red-500" title="Delete Table"><Trash2 size={16} /></button>
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-100">
+            <div className="p-2 sm:p-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
+              <table className="min-w-full text-xs border-collapse">
+                <thead className="bg-slate-100">
                   <tr>
-                    <th className="w-8 px-2 py-2 text-xs font-medium text-gray-500">#</th>
+                    <th className="p-2 border border-slate-300 font-semibold text-slate-600 w-10 text-center sticky left-0 bg-slate-100 z-10">#</th>
                     {table.headers.map((header, colIndex) => (
-                      <th key={colIndex} className="px-4 py-2 text-left">
-                        <div className="flex items-center justify-between">
+                      <th key={colIndex} className="p-0 border border-slate-300 font-semibold text-slate-600 min-w-[120px]">
+                        <div className="flex items-center justify-between h-full">
                           <input
-                            type="text"
-                            value={header}
+                            type="text" value={header}
                             onChange={(e) => updateHeader(table.id, colIndex, e.target.value)}
-                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                            placeholder={`Column ${colIndex + 1}`}
+                            className={`${smallInputClass} rounded-none border-0 focus:ring-0 focus:border-blue-500 h-full`}
+                            placeholder={`Header ${colIndex + 1}`}
                           />
                           {table.headers.length > 1 && (
-                            <button
-                              onClick={() => removeColumn(table.id, colIndex)}
-                              className="ml-2 p-1 text-red-500 hover:text-red-700"
-                            >
-                              <Minus size={12} />
-                            </button>
+                            <button onClick={() => removeColumn(table.id, colIndex)} type="button" className="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 flex-shrink-0" title="Remove Column"><MinusCircle size={14} /></button>
                           )}
                         </div>
                       </th>
@@ -205,28 +185,22 @@ const TableBuilder: React.FC<TableBuilderProps> = ({
                 </thead>
                 <tbody>
                   {table.rows.map((row, rowIndex) => (
-                    <tr key={rowIndex} className="border-t border-gray-200">
-                      <td className="px-2 py-2 text-xs text-gray-500 bg-gray-50">
-                        <div className="flex items-center justify-between">
-                          <span>{rowIndex + 1}</span>
+                    <tr key={rowIndex}>
+                      <td className="p-0 border border-slate-300 text-center text-slate-500 sticky left-0 bg-slate-50 z-10">
+                         <div className="flex items-center justify-center h-full relative group">
+                           <span className="px-2">{rowIndex + 1}</span>
                           {table.rows.length > 1 && (
-                            <button
-                              onClick={() => removeRow(table.id, rowIndex)}
-                              className="p-1 text-red-500 hover:text-red-700"
-                            >
-                              <Minus size={10} />
-                            </button>
+                            <button onClick={() => removeRow(table.id, rowIndex)} type="button" className="absolute right-0 p-0.5 text-red-500 hover:text-red-700 hover:bg-red-100 opacity-0 group-hover:opacity-100 transition-opacity" title="Remove Row"><MinusCircle size={14} /></button>
                           )}
                         </div>
                       </td>
                       {row.map((cell, colIndex) => (
-                        <td key={colIndex} className="px-4 py-2">
+                        <td key={colIndex} className="p-0 border border-slate-300 min-w-[120px]">
                           <input
-                            type="text"
-                            value={cell}
+                            type="text" value={cell}
                             onChange={(e) => updateCell(table.id, rowIndex, colIndex, e.target.value)}
-                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                            placeholder="Enter data"
+                            className={`${smallInputClass} rounded-none border-0 h-full focus:ring-0 focus:border-blue-500`}
+                            placeholder="Data"
                           />
                         </td>
                       ))}
@@ -238,12 +212,6 @@ const TableBuilder: React.FC<TableBuilderProps> = ({
           </div>
         ))}
       </div>
-
-      {tables.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          No tables created yet. Use the form above to create your first table.
-        </div>
-      )}
     </div>
   );
 };
