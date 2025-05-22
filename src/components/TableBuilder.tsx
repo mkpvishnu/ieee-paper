@@ -26,7 +26,7 @@ const TableBuilder: React.FC<TableBuilderProps> = ({
 
     const newTable: Table = {
       id: Date.now().toString(),
-      caption: `Table ${tables.length + 1}`,
+      caption: 'Enter table caption here',
       headers,
       rows
     };

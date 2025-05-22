@@ -150,10 +150,14 @@
   font-size: 10px;
 }
 
+/* Enhanced table styles for editing */
 .ProseMirror table {
   border-collapse: collapse;
   margin: 8px 0;
   width: 100%;
+  max-width: 100%;
+  font-size: 9px;
+  table-layout: fixed;
 }
 
 .ProseMirror th,
@@ -161,6 +165,8 @@
   border: 1px solid #000;
   padding: 2px 4px;
   vertical-align: top;
+  word-wrap: break-word;
+  min-width: 40px;
 }
 
 .ProseMirror th {
@@ -168,11 +174,55 @@
   font-weight: bold;
 }
 
+/* Enhanced image styles with resizing */
 .ProseMirror img {
   max-width: 100%;
   height: auto;
   display: block;
   margin: 8px auto;
+  border: 1px dashed transparent;
+  cursor: pointer;
+  resize: both;
+  overflow: auto;
+  min-width: 50px;
+  min-height: 50px;
+}
+
+.ProseMirror img:hover {
+  border: 1px dashed #3b82f6;
+}
+
+.ProseMirror img:focus {
+  border: 2px solid #3b82f6;
+  outline: none;
+}
+
+.ProseMirror img.selected {
+  border: 2px solid #3b82f6;
+}
+
+/* IEEE Column constraints for images and tables */
+.ieee-columns img {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  display: block;
+  margin: 8px auto;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.ieee-columns table {
+  max-width: 100%;
+  font-size: 8px;
+  width: 100%;
+  break-inside: avoid;
+  margin: 8px 0;
+}
+
+.ieee-columns .ProseMirror table {
+  font-size: 8px;
+  max-width: 100%;
 }
 
 /* Drag and drop styles */
@@ -197,4 +247,185 @@
   .no-print {
     display: none !important;
   }
+  
+  .ProseMirror img {
+    border: none !important;
+    resize: none;
+  }
+}
+
+/* Custom Animations */
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeInRight {
+  animation: fadeInRight 0.3s ease-out forwards;
+}
+
+/* IEEE Page specific styles (can be expanded) */
+.ieee-page {
+  width: 8.5in;
+  min-height: 11in; /* Use min-height for content that might exceed one page */
+  margin: 2rem auto; /* Center the page, provide some margin */
+  padding: 0.75in; /* IEEE margins */
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-sizing: border-box; /* Ensure padding is included in width/height */
+}
+
+.ieee-title {
+  text-align: center;
+  font-size: 20pt; /* Approx, adjust as per IEEE spec */
+  font-family: 'Times New Roman', Times, serif;
+  margin-bottom: 0.5in;
+  font-weight: bold;
+}
+
+.ieee-authors {
+  text-align: center;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 11pt;
+  margin-bottom: 0.5in;
+}
+
+.ieee-abstract {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 9pt;
+  margin-bottom: 0.25in;
+  padding-left: 0.20in; /* Indent abstract block slightly */
+  padding-right: 0.20in;
+}
+
+.ieee-abstract .font-bold {
+  font-size: 10pt; /* Abstract and Keywords heading */
+}
+
+/* Two-column layout for main content */
+.ieee-columns {
+  column-count: 2;
+  column-gap: 0.25in; /* Gap between columns */
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 10pt; /* Main text size */
+  line-height: 1.15; /* Adjust for readability */
+}
+
+.ieee-section-title {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 11pt; /* Section title size */
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 0.1in;
+  margin-top: 0.2in; /* Space above section title */
+  break-after: avoid-column; /* Try to keep title with content */
+}
+
+/* Ensure first section title doesn't have too much top margin */
+.ieee-columns > div:first-child > .ieee-section-title {
+  margin-top: 0;
+}
+
+.ieee-reference {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 8pt; /* Reference text size */
+  margin-bottom: 0.05in;
+  break-inside: avoid-column;
+}
+
+.ieee-caption {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 9pt;
+  /* margin-top: 0.1in; */ /* Already handled by figure/table wrappers */
+  /* margin-bottom: 0.1in; */
+}
+
+.ieee-figure, .ieee-table-wrapper /* Renamed class for table container */ {
+  break-inside: avoid-column;
+  margin-bottom: 1em; /* Consistent spacing */
+}
+
+.ieee-table {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 8pt; /* Table text size */
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  /* width: auto; */ /* Let table size itself or provide max-width */
+  max-width: 100%; /* Ensure table doesn't overflow column */
+}
+
+.ieee-table th, .ieee-table td {
+  border: 1px solid #000; /* IEEE usually has solid borders */
+  padding: 3px 5px;
+  text-align: left;
+}
+
+.ieee-table thead {
+  background-color: #e0e0e0; /* Light gray for header, adjust if needed */
+  font-weight: bold;
+}
+
+.ieee-table th {
+  text-align: center; /* Center align table headers */
+}
+
+/* ProseMirror / TipTap specific content styling */
+.ProseMirror {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 10pt;
+  line-height: 1.15;
+  min-height: 100px; /* Or whatever min-height you prefer */
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+.ProseMirror p {
+  margin-bottom: 0.5em; /* Space between paragraphs */
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  margin-left: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid #ccc;
+  margin-left: 1em;
+  padding-left: 1em;
+  font-style: italic;
+}
+
+.ProseMirror pre {
+  background: #f4f4f4;
+  border-radius: 4px;
+  padding: 0.75em 1em;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  white-space: pre-wrap;
+}
+
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 1em 0;
+}
+
+/* Responsive adjustments if needed */
+@media (max-width: 8.5in) { /* Approx one column width */
+  /* 
+  .ieee-columns {
+    column-count: 1;
+  }
+  */
+  /* Keep two columns unless very small screen, then it might become unreadable */
 } 

@@ -23,7 +23,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         const newFigure: Figure = {
           id: Date.now().toString(),
           src: reader.result as string,
-          caption: `Figure ${figures.length + 1}`,
+          caption: 'Enter figure caption here',
           width: undefined,
           height: undefined
         };
